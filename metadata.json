@@ -1,0 +1,6 @@
+{
+  "name": "P09 Real Estate Portal",
+  "description": "Real Estate Property Listing & Enquiry Portal with role-based access for Buyers, Agents, and Admins, featuring search, verification, lead management, and analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

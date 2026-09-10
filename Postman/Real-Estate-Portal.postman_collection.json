@@ -1,0 +1,858 @@
+{
+  "info": {
+    "_postman_id": "c09a82e1-45bc-488b-a7e1-p09realestate2026",
+    "name": "P09 — Real Estate Property Listing & Enquiry Portal",
+    "description": "Complete Postman API Collection covering all 13 Functional Modules, Role-Based Access Control, Business Rule State Transitions, and Error Handling for Academic Lab Demonstrations.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    },
+    {
+      "key": "adminToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "agentToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "buyerToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "propertyId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "enquiryId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "agentId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "1.1 Login as Admin (Sets {{adminToken}})",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.token) {",
+                  "    pm.collectionVariables.set(\"adminToken\", jsonData.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@realestate.com\",\n  \"password\": \"Admin@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "1.2 Login as Agent Ravi (Sets {{agentToken}} & {{agentId}})",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.token) {",
+                  "    pm.collectionVariables.set(\"agentToken\", jsonData.data.token);",
+                  "    pm.collectionVariables.set(\"agentId\", jsonData.data.user.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"agent.ravi@realestate.com\",\n  \"password\": \"Agent@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "1.3 Login as Buyer Priya (Sets {{buyerToken}})",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.token) {",
+                  "    pm.collectionVariables.set(\"buyerToken\", jsonData.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"buyer.priya@gmail.com\",\n  \"password\": \"Buyer@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "1.4 Register New Buyer",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Student Demo User\",\n  \"email\": \"demo.student@gmail.com\",\n  \"password\": \"Password@123\",\n  \"role\": \"BUYER\",\n  \"phone\": \"+91 99999 88888\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "1.5 Get Current Profile (GET /api/auth/me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{buyerToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Property Management",
+      "item": [
+        {
+          "name": "2.1 Create Property Listing (Agent Only - Sets {{propertyId}})",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.property) {",
+                  "    pm.collectionVariables.set(\"propertyId\", jsonData.data.property._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{agentToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Panoramic Sky Villa in Koramangala\",\n  \"description\": \"Lavish penthouse featuring private terrace deck, plunge pool, Italian marble flooring, and smart home automation.\",\n  \"type\": \"Villa\",\n  \"listingType\": \"SALE\",\n  \"price\": 29500000,\n  \"city\": \"Bengaluru\",\n  \"locality\": \"Koramangala\",\n  \"bedrooms\": 4,\n  \"bathrooms\": 4,\n  \"area\": 3600,\n  \"images\": [\n    \"https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=80\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/properties",
+              "host": ["{{baseUrl}}"],
+              "path": ["properties"]
+            }
+          }
+        },
+        {
+          "name": "2.2 Get Verified Properties (Public)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/properties",
+              "host": ["{{baseUrl}}"],
+              "path": ["properties"]
+            }
+          }
+        },
+        {
+          "name": "2.3 Get Agent My Listings",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{agentToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/properties/my",
+              "host": ["{{baseUrl}}"],
+              "path": ["properties", "my"]
+            }
+          }
+        },
+        {
+          "name": "2.4 Get Property By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{agentToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/properties/{{propertyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["properties", "{{propertyId}}"]
+            }
+          }
+        },
+        {
+          "name": "2.5 Update Property (Owner Agent Only)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{agentToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 28900000,\n  \"description\": \"Updated price discount for festive season. Lavish penthouse in Koramangala.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/properties/{{propertyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["properties", "{{propertyId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Search, Filter & Location Grouping",
+      "item": [
+        {
+          "name": "3.1 Search & Filter Properties (City, Type, Price)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/properties/search?city=Bengaluru&type=Villa&maxPrice=50000000&bedrooms=3&sortBy=price_asc",
+              "host": ["{{baseUrl}}"],
+              "path": ["properties", "search"],
+              "query": [
+                { "key": "city", "value": "Bengaluru" },
+                { "key": "type", "value": "Villa" },
+                { "key": "maxPrice", "value": "50000000" },
+                { "key": "bedrooms", "value": "3" },
+                { "key": "sortBy", "value": "price_asc" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.2 Group Listings By Cities (GET /properties/cities)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/properties/cities",
+              "host": ["{{baseUrl}}"],
+              "path": ["properties", "cities"]
+            }
+          }
+        },
+        {
+          "name": "3.3 Browse City Properties (GET /properties/city/:city)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/properties/city/Bengaluru",
+              "host": ["{{baseUrl}}"],
+              "path": ["properties", "city", "Bengaluru"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Property Verification Workflow (Admin)",
+      "item": [
+        {
+          "name": "4.1 Get Pending Listings Awaiting Review",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/properties/pending",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "properties", "pending"]
+            }
+          }
+        },
+        {
+          "name": "4.2 Verify Property (Admin Only: PENDING -> VERIFIED)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"VERIFIED\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/properties/{{propertyId}}/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["properties", "{{propertyId}}", "verify"]
+            }
+          }
+        },
+        {
+          "name": "4.3 Reject Property with Reason (Admin Only)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"REJECTED\",\n  \"rejectionReason\": \"Incomplete RERA sanction and title deed documentation.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/properties/{{propertyId}}/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["properties", "{{propertyId}}", "verify"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Favourites (Buyer Only)",
+      "item": [
+        {
+          "name": "5.1 Add Property to Favourites",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{buyerToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/favourites/{{propertyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["favourites", "{{propertyId}}"]
+            }
+          }
+        },
+        {
+          "name": "5.2 Get Buyer Favourites",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{buyerToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/favourites",
+              "host": ["{{baseUrl}}"],
+              "path": ["favourites"]
+            }
+          }
+        },
+        {
+          "name": "5.3 Remove Property from Favourites",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{buyerToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/favourites/{{propertyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["favourites", "{{propertyId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Enquiries & Lead Management",
+      "item": [
+        {
+          "name": "6.1 Submit Enquiry (Buyer Only - Sets {{enquiryId}})",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.data && jsonData.data.enquiry) {",
+                  "    pm.collectionVariables.set(\"enquiryId\", jsonData.data.enquiry._id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{buyerToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"propertyId\": \"{{propertyId}}\",\n  \"message\": \"Hello, I am interested in viewing this property. Is a bank loan from HDFC supported?\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/enquiries",
+              "host": ["{{baseUrl}}"],
+              "path": ["enquiries"]
+            }
+          }
+        },
+        {
+          "name": "6.2 Get Buyer Submitted Enquiries",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{buyerToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/enquiries/my",
+              "host": ["{{baseUrl}}"],
+              "path": ["enquiries", "my"]
+            }
+          }
+        },
+        {
+          "name": "6.3 Get Agent Received Leads",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{agentToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/enquiries/agent",
+              "host": ["{{baseUrl}}"],
+              "path": ["enquiries", "agent"]
+            }
+          }
+        },
+        {
+          "name": "6.4 Update Enquiry Status: NEW -> CONTACTED",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{agentToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CONTACTED\",\n  \"remarks\": \"Called buyer. Walkthrough scheduled.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/enquiries/{{enquiryId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["enquiries", "{{enquiryId}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "6.5 Update Enquiry Status: CONTACTED -> APPROVED",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{agentToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"APPROVED\",\n  \"remarks\": \"Token advance paid by buyer.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/enquiries/{{enquiryId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["enquiries", "{{enquiryId}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "6.6 Update Enquiry Status: APPROVED -> CLOSED",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{agentToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CLOSED\",\n  \"remarks\": \"Deal registered at sub-registrar office.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/enquiries/{{enquiryId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["enquiries", "{{enquiryId}}", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Property Status Tracking",
+      "item": [
+        {
+          "name": "7.1 Transition Status: AVAILABLE -> UNDER_NEGOTIATION",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{agentToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"UNDER_NEGOTIATION\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/properties/{{propertyId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["properties", "{{propertyId}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "7.2 Transition Status: UNDER_NEGOTIATION -> SOLD",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{agentToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"SOLD\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/properties/{{propertyId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["properties", "{{propertyId}}", "status"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Agent Profile & Ratings",
+      "item": [
+        {
+          "name": "8.1 Get Agent Profile & Performance Metrics",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/agents/{{agentId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["agents", "{{agentId}}"]
+            }
+          }
+        },
+        {
+          "name": "8.2 Get Verified Properties by Agent",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/agents/{{agentId}}/properties",
+              "host": ["{{baseUrl}}"],
+              "path": ["agents", "{{agentId}}", "properties"]
+            }
+          }
+        },
+        {
+          "name": "8.3 Rate Agent (Buyer Only: 1 to 5 Stars)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{buyerToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"review\": \"Outstanding experience! Very patient with queries and helped coordinate property verification.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/agents/{{agentId}}/ratings",
+              "host": ["{{baseUrl}}"],
+              "path": ["agents", "{{agentId}}", "ratings"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Admin Moderation & Reports",
+      "item": [
+        {
+          "name": "9.1 Admin Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users"]
+            }
+          }
+        },
+        {
+          "name": "9.2 Admin Get All Agents",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/agents",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "agents"]
+            }
+          }
+        },
+        {
+          "name": "9.3 Report: Top Most-Enquired Properties (Aggregation)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/reports/top-properties?limit=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "reports", "top-properties"],
+              "query": [{ "key": "limit", "value": "5" }]
+            }
+          }
+        },
+        {
+          "name": "9.4 Report: Agent Performance (Aggregation)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/reports/agent-performance",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "reports", "agent-performance"]
+            }
+          }
+        },
+        {
+          "name": "9.5 Report: Platform Summary Totals",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/reports/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "reports", "summary"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Required Error & Business Rule Edge Cases",
+      "item": [
+        {
+          "name": "10.1 Validation Failure -> 400 (Bad Email Format)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"not-an-email\",\n  \"password\": \"123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "10.2 Missing Token -> 401 Unauthorized",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "10.3 Wrong Role -> 403 Forbidden (Buyer accessing Admin API)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{buyerToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users"]
+            }
+          }
+        },
+        {
+          "name": "10.4 Invalid / Non-existent ID -> 404",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/properties/507f1f77bcf86cd799439011",
+              "host": ["{{baseUrl}}"],
+              "path": ["properties", "507f1f77bcf86cd799439011"]
+            }
+          }
+        },
+        {
+          "name": "10.5 Duplicate Favourite -> 409 Conflict",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{buyerToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/favourites/{{propertyId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["favourites", "{{propertyId}}"]
+            }
+          }
+        },
+        {
+          "name": "10.6 Invalid Enquiry Status Transition -> 409 Conflict",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{agentToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"NEW\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/enquiries/{{enquiryId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["enquiries", "{{enquiryId}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "10.7 Invalid Property Status Transition -> 409 Conflict (SOLD -> AVAILABLE)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{agentToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"AVAILABLE\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/properties/{{propertyId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["properties", "{{propertyId}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "10.8 Registration Self-Assign Admin -> 403 Forbidden",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Fake Admin\",\n  \"email\": \"fake.admin@domain.com\",\n  \"password\": \"Password@123\",\n  \"role\": \"ADMIN\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
