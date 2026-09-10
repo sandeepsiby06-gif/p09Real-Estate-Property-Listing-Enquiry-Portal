@@ -166,8 +166,8 @@ npm run seed
 npm run dev
 # or: npm start
 ```
-* **Frontend Web Application**: [http://localhost:3000](http://localhost:3000)
-* **REST API Base URL**: `http://localhost:3000/api`
+* **Frontend Web Application**: [http://localhost:5000](http://localhost:5000)
+* **REST API Base URL**: `http://localhost:5000/api`
 
 ---
 
